@@ -192,7 +192,6 @@
     const db = firebase.database();
 
     // --- ADMIN SECURITY PIN ---
-    // Yahan aap apna Delete karne ka Password set kar sakte hain
     const ADMIN_PIN = "142212"; 
 
     // Tab Data Structure
@@ -266,6 +265,19 @@
         btn.classList.add('active');
     }
 
+    // --- DOUBLE ENTRY (DUPLICATE SERIAL) CHECKER LOGIC ---
+    function isDuplicateSerial(serial) {
+        if (!serial) return false;
+        let isDup = false;
+        document.querySelectorAll('tbody tr').forEach(row => {
+            let existingSerial = row.cells[6].innerText.trim();
+            if (existingSerial !== "" && existingSerial.toLowerCase() === serial.toLowerCase()) {
+                isDup = true;
+            }
+        });
+        return isDup;
+    }
+
     function createRow(bodyId, bid, loc, fru, make, model, serial, date, skipSave = false) {
         const body = document.getElementById(bodyId);
         const tr = document.createElement('tr');
@@ -314,8 +326,16 @@
 
     function manualAdd(prefix, bodyId) {
         const inputs = [`${prefix}_bid`, `${prefix}_loc`, `${prefix}_fru`, `${prefix}_make`, `${prefix}_model`, `${prefix}_serial`, `${prefix}_date`];
-        const vals = inputs.map(id => document.getElementById(id).value);
+        const vals = inputs.map(id => document.getElementById(id).value.trim());
+        
         if(!vals[0] || !vals[6]) return alert("Bank Id aur Warranty End Date dalna zaroori hai!");
+        
+        // CHECK DOUBLE ENTRY HERE
+        const serialNum = vals[5];
+        if (serialNum && isDuplicateSerial(serialNum)) {
+            return alert(`Error: Serial Number "${serialNum}" pehle se hi system mein kisi tab mein maujood hai! Double entry allow nahi hai.`);
+        }
+
         createRow(bodyId, vals[0], vals[1], vals[2], vals[3], vals[4], vals[5], vals[6]);
         inputs.forEach(id => document.getElementById(id).value = "");
         saveAllDataToFirebase();
@@ -340,16 +360,35 @@
             const data = new Uint8Array(e.target.result);
             const wb = XLSX.read(data, {type: 'array'});
             const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
+            
+            let duplicateCount = 0;
+            let addedCount = 0;
+
             for(let i=1; i<json.length; i++) {
                 const r = json[i];
                 if(r[0]) {
+                    let serial = r[5] ? r[5].toString().trim() : '';
+                    
+                    // CHECK DOUBLE ENTRY FOR EXCEL DATA
+                    if (serial && isDuplicateSerial(serial)) {
+                        duplicateCount++;
+                        continue; // Agar double entry hui toh skip kar dega
+                    }
+
                     let d = r[6];
                     if(!isNaN(d)) d = new Date((d - 25569) * 86400 * 1000).toISOString().split('T')[0];
-                    createRow(bodyId, r[0]||'', r[1]||'', r[4]||'', r[2]||'', r[3]||'', r[5]||'', d||'', true);
+                    createRow(bodyId, r[0]||'', r[1]||'', r[4]||'', r[2]||'', r[3]||'', serial, d||'', true);
+                    addedCount++;
                 }
             }
             input.value = "";
             saveAllDataToFirebase();
+
+            if (duplicateCount > 0) {
+                alert(`${addedCount} nayi entries add ho gayi! \nAur ${duplicateCount} duplicate Serial Numbers ko chhod diya gaya.`);
+            } else {
+                alert(`${addedCount} entries successfully add ho gayi!`);
+            }
         };
         reader.readAsArrayBuffer(input.files[0]);
     }
