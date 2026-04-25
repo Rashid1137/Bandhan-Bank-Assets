@@ -3,161 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Assets Warranty Tracker</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Bandhan IT Assets Management Pro</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
     <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light-bg: #f4f7f6;
+            --white: #ffffff;
+        }
+
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             margin: 0; 
             padding: 20px; 
-            background-color: #eef2f5;
+            background-color: var(--light-bg);
             color: #333;
-            font-size: 16px; 
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-
-        .tabs-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-
-        .tab-btn {
-            padding: 12px 25px;
-            cursor: pointer;
-            border: none;
-            background: #bdc3c7;
-            color: white;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        .tab-btn.active {
-            background: #3498db;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
+            background: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         .header-center {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 15px;
         }
 
-        .add-form {
+        .header-center h2 { color: var(--secondary); margin: 0; font-size: 28px; }
+        .header-center h4 { color: var(--primary); margin: 5px 0; font-weight: 500; }
+
+        .tabs-container {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 10px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
+            margin-bottom: 20px;
         }
 
-        .excel-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #e8f4fd;
+        .tab-btn {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            background: #dcdde1;
+            color: var(--secondary);
             border-radius: 8px;
-            border: 1px dashed #3498db;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn.active { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .action-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .excel-input-group { display: flex; align-items: center; gap: 10px; background: white; padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; }
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-sort { background-color: var(--warning); color: white; }
+        .btn-pdf { background-color: var(--success); color: white; }
+        .btn-del-all { background-color: var(--danger); color: white; }
+        .btn-add { background-color: var(--primary); color: white; width: 100%; margin-top: 10px; padding: 12px; }
+        .btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+        .add-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
         }
 
         .add-form input {
-            flex: 1 1 130px;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
+            transition: 0.3s;
         }
 
-        .btn-add {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .add-form input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 5px rgba(52, 152, 219, 0.2); }
 
-        .btn-pdf {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .table-container { overflow-x: auto; margin-top: 10px; border-radius: 8px; border: 1px solid #eee; }
 
-        .btn-sort {
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 10px; 
-        }
-        th, td { 
-            border: 1px solid #e0e0e0; 
-            padding: 10px; 
-            text-align: left; 
-            font-size: 14px;
-        }
-        th { 
-            background-color: #2c3e50; 
-            color: white;
-        }
+        table { width: 100%; border-collapse: collapse; background: white; min-width: 1000px; }
+        th, td { border: 1px solid #f0f0f0; padding: 12px 10px; text-align: left; font-size: 13.5px; }
+        th { background-color: var(--secondary); color: white; position: sticky; top: 0; }
         
-        .expired { background-color: #ffe6e6; color: #cc0000; }
-        .expiring-soon { background-color: #fff8cc; color: #b38600; }
-        .valid { background-color: #e6ffe6; color: #008000; }
+        tr:hover { background-color: #f9fbfc; }
+        
+        .expired { background-color: #ffeaea !important; color: #d63031; }
+        .expiring-soon { background-color: #fffbe6 !important; color: #e67e22; }
+        .valid { background-color: #f1f9f1 !important; color: #27ae60; }
 
-        .status-badge {
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
+        .status-badge { font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
+
+        .checkbox-col { text-align: center; width: 40px; }
+        input[type="checkbox"] { cursor: pointer; transform: scale(1.2); }
 
         @media print {
-            .add-form, .excel-section, .tabs-container, .btn-delete, button {
-                display: none !important;
-            }
-            body { padding: 0; }
-            .container { box-shadow: none; max-width: 100%; }
+            .control-panel, .tab-btn, .checkbox-col, th:last-child, td:last-child, .tabs-container { display: none !important; }
+            body { padding: 0; background-color: white; }
+            .container { box-shadow: none; border: none; max-width: 100%; }
+            th { background-color: #333 !important; color: white !important; }
+            td { font-size: 11px; }
         }
     </style>
 </head>
@@ -165,88 +164,17 @@
 
 <div class="container">
     <div class="header-center">
-        <h2>📊 Bandhan Bank IT Assets Management (Cloud)</h2>
-        <h4>Rashid Husain - 9720110030</h4>
+        <h2><i class="fas fa-database"></i> Bandhan Bank IT Assets Tracker</h2>
+        <h4>Rashid Husain - IT Management Portal</h4>
     </div>
 
     <div class="tabs-container">
-        <button class="tab-btn active" onclick="switchTab('printerTab', this)">🖨️ Printer Tracker</button>
-        <button class="tab-btn" onclick="switchTab('systemTab', this)">💻 System & Monitor</button>
+        <button class="tab-btn active" onclick="switchTab('printerTab', this)"><i class="fas fa-print"></i> Printer Tracker</button>
+        <button class="tab-btn" onclick="switchTab('systemTab', this)"><i class="fas fa-desktop"></i> System & Monitor</button>
+        <button class="tab-btn" onclick="switchTab('ccmTab', this)"><i class="fas fa-money-bill-wave"></i> CCM & UV Lamp</button>
     </div>
 
-    <div id="printerTab" class="tab-content active">
-        <div class="excel-section">
-            <div><strong>📁 Printer Excel:</strong> <input type="file" onchange="handleExcel(this, 'printerBody')" /></div>
-            <div>
-                <button class="btn-sort" onclick="sortRows('printerBody')">📅 Sort by Date</button>
-                <button class="btn-pdf" onclick="window.print()">📄 PDF Report</button>
-            </div>
-        </div>
-        <div class="add-form">
-            <input type="text" id="p_bid" placeholder="Bank Id">
-            <input type="text" id="p_loc" placeholder="Bank Name">
-            <input type="text" id="p_make" placeholder="Company">
-            <input type="text" id="p_model" placeholder="Model">
-            <input type="text" id="p_fru" placeholder="Bandhan FRU No.">
-            <input type="text" id="p_serial" placeholder="Serial No.">
-            <input type="date" id="p_date">
-            <button class="btn-add" onclick="manualAdd('p', 'printerBody')">Submit</button>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Bank Id</th>
-                    <th>Bank Name</th>
-                    <th>Company</th>
-                    <th>Model</th>
-                    <th>FRU No.</th>
-                    <th>Serial No.</th>
-                    <th>Warranty End</th>
-                    <th>Days Left</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="printerBody"></tbody>
-        </table>
-    </div>
-
-    <div id="systemTab" class="tab-content">
-        <div class="excel-section">
-            <div><strong>📁 System Excel:</strong> <input type="file" onchange="handleExcel(this, 'systemBody')" /></div>
-            <div>
-                <button class="btn-sort" onclick="sortRows('systemBody')">📅 Sort by Date</button>
-                <button class="btn-pdf" onclick="window.print()">📄 PDF Report</button>
-            </div>
-        </div>
-        <div class="add-form">
-            <input type="text" id="s_bid" placeholder="Bank Id">
-            <input type="text" id="s_loc" placeholder="Bank Name">
-            <input type="text" id="s_make" placeholder="Company">
-            <input type="text" id="s_model" placeholder="Model">
-            <input type="text" id="s_fru" placeholder="Bandhan FRU No.">
-            <input type="text" id="s_serial" placeholder="Serial No.">
-            <input type="date" id="s_date">
-            <button class="btn-add" onclick="manualAdd('s', 'systemBody')">Submit</button>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Bank Id</th>
-                    <th>Bank Name</th>
-                    <th>Company</th>
-                    <th>Model</th>
-                    <th>FRU No.</th>
-                    <th>Serial No.</th>
-                    <th>Warranty End</th>
-                    <th>Days Left</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="systemBody"></tbody>
-        </table>
-    </div>
+    <div id="tabPanels"></div>
 </div>
 
 <script>
@@ -260,10 +188,76 @@
         messagingSenderId: "731316926783",
         appId: "1:731316926783:web:c10b1da2fa8ff39c88fb8a"
     };
-
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    // --- ADMIN SECURITY PIN ---
+    // Yahan aap apna Delete karne ka Password set kar sakte hain
+    const ADMIN_PIN = "142212"; 
+
+    // Tab Data Structure
+    const tabs = [
+        { id: 'printerTab', body: 'printerBody', icon: 'p', title: 'Printer' },
+        { id: 'systemTab', body: 'systemBody', icon: 's', title: 'System' },
+        { id: 'ccmTab', body: 'ccmBody', icon: 'c', title: 'CCM & UV Lamp' }
+    ];
+
+    // Build the Panels dynamically
+    const panelsContainer = document.getElementById('tabPanels');
+    tabs.forEach((tab, index) => {
+        const activeClass = index === 0 ? 'active' : '';
+        panelsContainer.innerHTML += `
+            <div id="${tab.id}" class="tab-content ${activeClass}">
+                <div class="control-panel">
+                    <div class="action-bar">
+                        <div class="excel-input-group">
+                            <i class="fas fa-file-excel" style="color:#27ae60"></i>
+                            <strong>Upload Excel:</strong> 
+                            <input type="file" accept=".xlsx, .xls" onchange="handleExcel(this, '${tab.body}')" />
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-sort" onclick="sortRows('${tab.body}', 6)"><i class="fas fa-calendar-alt"></i> Sort Date</button>
+                            <button class="btn btn-sort" style="background:#8e44ad" onclick="sortRows('${tab.body}', 1)"><i class="fas fa-sort-alpha-down"></i> Sort ID</button>
+                            <button class="btn btn-pdf" onclick="window.print()"><i class="fas fa-file-pdf"></i> Report</button>
+                            <button class="btn btn-del-all" onclick="deleteSelected('${tab.body}')"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+                        </div>
+                    </div>
+                    <div class="add-form">
+                        <input type="text" id="${tab.icon}_bid" placeholder="Bank Id">
+                        <input type="text" id="${tab.icon}_loc" placeholder="Bank Name">
+                        <input type="text" id="${tab.icon}_make" placeholder="Make">
+                        <input type="text" id="${tab.icon}_model" placeholder="Model">
+                        <input type="text" id="${tab.icon}_fru" placeholder="FRU No.">
+                        <input type="text" id="${tab.icon}_serial" placeholder="Serial No.">
+                        <input type="date" id="${tab.icon}_date">
+                    </div>
+                    <button class="btn btn-add" onclick="manualAdd('${tab.icon}', '${tab.body}')"><i class="fas fa-plus"></i> Add New Entry</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" onclick="toggleSelectAll('${tab.body}', this)"></th>
+                                <th>Bank Id</th>
+                                <th>Bank Name</th>
+                                <th>Make</th>
+                                <th>Model</th>
+                                <th>FRU No.</th>
+                                <th>Serial No.</th>
+                                <th>Warranty End</th>
+                                <th>Days Left</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="${tab.body}"></tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    });
+
+    let isDataLoading = false;
 
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -272,65 +266,28 @@
         btn.classList.add('active');
     }
 
-    // Cloud Save Function
-    function saveAllData() {
-        const data = {
-            printers: extractTable('printerBody'),
-            systems: extractTable('systemBody')
-        };
-        db.ref('bank_assets/').set(data)
-            .then(() => console.log("Data saved to Cloud!"))
-            .catch((err) => console.error("Cloud Save Error:", err));
-    }
-
-    function extractTable(bodyId) {
-        let tableData = [];
-        document.querySelectorAll(`#${bodyId} tr`).forEach(row => {
-            const cols = row.querySelectorAll('td');
-            tableData.push({
-                bid: cols[0].innerText, loc: cols[1].innerText, make: cols[2].innerText, 
-                model: cols[3].innerText, fru: cols[4].innerText, serial: cols[5].innerText,
-                date: cols[6].querySelector('input').value
-            });
-        });
-        return tableData;
-    }
-
-    // Cloud Load Function
-    function loadAllData() {
-        db.ref('bank_assets/').once('value').then((snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                document.getElementById('printerBody').innerHTML = '';
-                document.getElementById('systemBody').innerHTML = '';
-                if(data.printers) data.printers.forEach(d => createRow('printerBody', d.bid, d.loc, d.fru, d.make, d.model, d.serial, d.date));
-                if(data.systems) data.systems.forEach(d => createRow('systemBody', d.bid, d.loc, d.fru, d.make, d.model, d.serial, d.date));
-            }
-        }).catch((err) => console.error("Cloud Load Error:", err));
-    }
-
-    function createRow(bodyId, bid, loc, fru, make, model, serial, date) {
+    function createRow(bodyId, bid, loc, fru, make, model, serial, date, skipSave = false) {
         const body = document.getElementById(bodyId);
         const tr = document.createElement('tr');
         tr.innerHTML = `
+            <td class="checkbox-col"><input type="checkbox" class="row-check"></td>
             <td>${bid}</td><td>${loc}</td><td>${make}</td><td>${model}</td><td>${fru}</td><td>${serial}</td>
-            <td><input type="date" value="${date}" onchange="refreshStatus(this)"></td>
+            <td><input type="date" value="${date}" onchange="refreshStatus(this)" style="border:none; background:transparent; font-family:inherit;"></td>
             <td class="days-left">-</td>
             <td><span class="status-badge status-text">-</span></td>
-            <td><button style="background:#e74c3c;color:white;border:none;cursor:pointer;padding:5px;" onclick="deleteEntry(this)">Del</button></td>
+            <td><button class="btn" style="background:none; color:var(--danger); padding:0;" onclick="deleteSingle(this)"><i class="fas fa-trash"></i></button></td>
         `;
         body.appendChild(tr);
-        refreshStatus(tr.querySelector('input'));
+        refreshStatus(tr.querySelector('input[type="date"]'), skipSave);
     }
 
-    function refreshStatus(input) {
+    function refreshStatus(input, skipSave = false) {
         const row = input.closest('tr');
         const daysCell = row.querySelector('.days-left');
         const statusSpan = row.querySelector('.status-text');
         row.classList.remove('expired', 'expiring-soon', 'valid');
 
-        if (!input.value) return;
-
+        if(!input.value) return;
         const endDate = new Date(input.value);
         const today = new Date();
         today.setHours(0,0,0,0);
@@ -342,41 +299,39 @@
             daysCell.innerText = Math.abs(diff) + " Overdue";
         } else if (diff <= 30) {
             row.classList.add('expiring-soon');
-            statusSpan.innerText = "Soon";
+            statusSpan.innerText = "Expiring Soon";
             daysCell.innerText = diff + " Days";
         } else {
             row.classList.add('valid');
             statusSpan.innerText = "Active";
             daysCell.innerText = diff + " Days";
         }
-        saveAllData();
+        
+        if(!skipSave && !isDataLoading) {
+            saveAllDataToFirebase();
+        }
     }
 
     function manualAdd(prefix, bodyId) {
-        const bid = document.getElementById(prefix + '_bid').value;
-        const loc = document.getElementById(prefix + '_loc').value;
-        const fru = document.getElementById(prefix + '_fru').value;
-        const make = document.getElementById(prefix + '_make').value;
-        const model = document.getElementById(prefix + '_model').value;
-        const serial = document.getElementById(prefix + '_serial').value;
-        const date = document.getElementById(prefix + '_date').value;
-
-        if(!bid || !date) return alert("Required fields missing!");
-        createRow(bodyId, bid, loc, fru, make, model, serial, date);
-        saveAllData();
-        document.querySelectorAll(`.add-form input`).forEach(i => i.value = "");
+        const inputs = [`${prefix}_bid`, `${prefix}_loc`, `${prefix}_fru`, `${prefix}_make`, `${prefix}_model`, `${prefix}_serial`, `${prefix}_date`];
+        const vals = inputs.map(id => document.getElementById(id).value);
+        if(!vals[0] || !vals[6]) return alert("Bank Id aur Warranty End Date dalna zaroori hai!");
+        createRow(bodyId, vals[0], vals[1], vals[2], vals[3], vals[4], vals[5], vals[6]);
+        inputs.forEach(id => document.getElementById(id).value = "");
+        saveAllDataToFirebase();
     }
 
-    function sortRows(bodyId) {
+    function sortRows(bodyId, colIndex) {
         const tbody = document.getElementById(bodyId);
         const rows = Array.from(tbody.querySelectorAll('tr'));
         rows.sort((a, b) => {
-            const dateA = new Date(a.querySelector('input[type="date"]').value);
-            const dateB = new Date(b.querySelector('input[type="date"]').value);
-            return dateA - dateB;
+            let valA = a.cells[colIndex].innerText || a.cells[colIndex].querySelector('input')?.value || "";
+            let valB = b.cells[colIndex].innerText || b.cells[colIndex].querySelector('input')?.value || "";
+            return valA.localeCompare(valB, undefined, {numeric: true});
         });
         tbody.innerHTML = '';
         rows.forEach(row => tbody.appendChild(row));
+        saveAllDataToFirebase();
     }
 
     function handleExcel(input, bodyId) {
@@ -390,19 +345,93 @@
                 if(r[0]) {
                     let d = r[6];
                     if(!isNaN(d)) d = new Date((d - 25569) * 86400 * 1000).toISOString().split('T')[0];
-                    createRow(bodyId, r[0], r[1], r[4], r[2], r[3], r[5], d);
+                    createRow(bodyId, r[0]||'', r[1]||'', r[4]||'', r[2]||'', r[3]||'', r[5]||'', d||'', true);
                 }
             }
-            saveAllData();
+            input.value = "";
+            saveAllDataToFirebase();
         };
         reader.readAsArrayBuffer(input.files[0]);
     }
 
-    function deleteEntry(btn) {
-        if(confirm("Delete entry?")) { btn.closest('tr').remove(); saveAllData(); }
+    function toggleSelectAll(bodyId, masterCheck) {
+        const checks = document.querySelectorAll(`#${bodyId} .row-check`);
+        checks.forEach(c => c.checked = masterCheck.checked);
     }
 
-    window.onload = loadAllData;
+    // --- SECURE DELETE LOGIC ---
+    function deleteSelected(bodyId) {
+        const checks = document.querySelectorAll(`#${bodyId} .row-check:checked`);
+        if(checks.length === 0) return alert("Pehle delete karne ke liye entries select karein!");
+        
+        let pass = prompt("Dhyan Dein: Delete karne ke liye Admin PIN dalein:");
+        if(pass !== ADMIN_PIN) {
+            return alert("Galat PIN! Sirf Admin data delete kar sakta hai.");
+        }
+
+        if(confirm(`Kya aap sach me ye ${checks.length} entries delete karna chahte hain?`)) {
+            checks.forEach(c => c.closest('tr').remove());
+            saveAllDataToFirebase();
+        }
+    }
+
+    function deleteSingle(btn) {
+        let pass = prompt("Dhyan Dein: Delete karne ke liye Admin PIN dalein:");
+        if(pass !== ADMIN_PIN) {
+            return alert("Galat PIN! Sirf Admin data delete kar sakta hai.");
+        }
+
+        if(confirm("Kya aap is entry ko delete karna chahte hain?")) { 
+            btn.closest('tr').remove(); 
+            saveAllDataToFirebase(); 
+        }
+    }
+
+    // --- FIREBASE SYNC LOGIC ---
+    function saveAllDataToFirebase() {
+        if(isDataLoading) return; // Prevent saving while loading from DB
+        
+        const data = {};
+        tabs.forEach(tab => {
+            data[tab.body] = [];
+            document.querySelectorAll(`#${tab.body} tr`).forEach(row => {
+                const cols = row.querySelectorAll('td');
+                data[tab.body].push({
+                    bid: cols[1].innerText, loc: cols[2].innerText, make: cols[3].innerText, 
+                    model: cols[4].innerText, fru: cols[5].innerText, serial: cols[6].innerText,
+                    date: cols[7].querySelector('input').value
+                });
+            });
+        });
+        
+        // Push to Firebase Realtime Database
+        db.ref('BandhanITAssets').set(data);
+    }
+
+    function loadDataFromFirebase() {
+        db.ref('BandhanITAssets').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                isDataLoading = true; // Block saves while rendering
+                
+                tabs.forEach(tab => {
+                    const tbody = document.getElementById(tab.body);
+                    tbody.innerHTML = ""; // Clear existing rows before adding new ones
+                    
+                    if(data[tab.body]) {
+                        data[tab.body].forEach(d => {
+                            createRow(tab.body, d.bid, d.loc, d.fru, d.make, d.model, d.serial, d.date, true);
+                        });
+                    }
+                });
+                
+                isDataLoading = false; // Unblock saves
+            }
+        });
+    }
+
+    // Initialize data load on window start
+    window.onload = loadDataFromFirebase;
 </script>
 </body>
 </html>
